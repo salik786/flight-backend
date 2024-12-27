@@ -1,6 +1,7 @@
 // api/flight.js
 
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
+const chromium = require('chrome-aws-lambda');
 
 // Utility function to format the date as `DD/MM/YYYY`
 const formatDate = (date) => {
@@ -16,7 +17,12 @@ const getFlightTimes = async (date, flightType) => {
     const formattedDate = formatDate(date);
     const url = `https://www.sydneyairport.com.au/flights/?query=&flightType=arrival&terminalType=${terminalType}&date=${formattedDate}&sortColumn=scheduled_time&ascending=true&showAll=true`;
 
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+        executablePath: await chromium.executablePath,
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        headless: true
+    });
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
